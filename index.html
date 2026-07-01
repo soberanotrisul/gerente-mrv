@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRV São Paulo | Saia do Aluguel — Minha Casa Minha Vida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+:root{
+--mrv-deep:#00582C;
+--mrv-green:#00833E;
+--mrv-bright:#00A651;
+--mrv-orange:#FF6B35;
+--cream:#FAF8F3;
+--ink:#15130F;
+--ink-soft:#5B564C;
+--line:rgba(21,19,15,0.09);
+--glass:rgba(255,255,255,0.12);
+}
+
+body{
+font-family:'Inter',-apple-system,sans-serif;color:var(--ink);
+line-height:1.65;background:#fff;-webkit-font-smoothing:antialiased;
+overflow-x:hidden
+}
+
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:400;letter-spacing:-0.5px;color:var(--ink)}
+h1{font-size:clamp(2.6rem,5vw,4.4rem);line-height:1.05}
+h2{font-size:clamp(2rem,3.4vw,2.9rem);line-height:1.15}
+h3{font-size:1.5rem;line-height:1.25}
+p{font-size:1.02rem;color:var(--ink-soft)}
+em{font-style:italic;color:var(--mrv-green)}
+strong{font-weight:700}
+
+.container{max-width:1240px;margin:0 auto;padding:0 48px}
+@media(max-width:768px){.container{padding:0 22px}}
+
+.eyebrow{
+display:inline-flex;align-items:center;gap:8px;
+font-size:0.74rem;font-weight:700;letter-spacing:1.6px;
+text-transform:uppercase;color:var(--mrv-green);margin-bottom:18px
+}
+.eyebrow::before{content:'';width:18px;height:3px;background:var(--mrv-green);display:inline-block}
+
+/* HEADER */
+header{
+background:rgba(250,248,243,0.95);backdrop-filter:blur(12px);
+padding:16px 0;border-top:3px solid var(--mrv-green);
+border-bottom:1px solid var(--line);position:sticky;top:0;z-index:200
+}
+.header-content{display:flex;justify-content:space-between;align-items:center;gap:24px}
+.logo-mrv{display:flex;align-items:center;gap:14px;text-decoration:none}
+.logo-svg{width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.05))}
+.logo-text{display:flex;flex-direction:column;line-height:1.1}
+.logo-text strong{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--ink);font-weight:600;letter-spacing:-0.5px}
+.logo-text span{font-size:0.66rem;color:var(--ink-soft);letter-spacing:0.5px;text-transform:uppercase}
+
+nav{display:flex;align-items:center;gap:36px}
+nav a{text-decoration:none;color:var(--ink-soft);font-size:0.92rem;font-weight:600;transition:color 0.25s;position:relative}
+nav a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--mrv-green);transition:width 0.3s}
+nav a:hover{color:var(--mrv-green)}
+nav a:hover::after{width:100%}
+.nav-cta{
+background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+color:#fff!important;padding:11px 24px;border-radius:999px;font-weight:700;box-shadow:0 4px 16px rgba(0,131,62,0.25)
+}
+.nav-cta::after{display:none!important}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,131,62,0.35)}
+@media(max-width:900px){nav a:not(.nav-cta){display:none}}
+
+/* HERO CAROUSEL */
+.hero-carousel{
+position:relative;height:clamp(60vh,85vh,700px);overflow:hidden;
+background:var(--mrv-deep)
+}
+.carousel-slide{
+position:absolute;inset:0;opacity:0;transition:opacity 1s ease,transform 1.2s ease;
+transform:scale(1.05)
+}
+.carousel-slide.active{opacity:1;transform:scale(1)}
+.carousel-slide img{width:100%;height:100%;object-fit:cover}
+.carousel-overlay{
+position:absolute;inset:0;
+background:linear-gradient(135deg,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.08) 50%,transparent 100%);
+z-index:1
+}
+.carousel-content{
+position:absolute;inset:0;z-index:2;display:flex;align-items:center
+}
+.carousel-text{max-width:620px}
+.carousel-text .eyebrow{color:#fff}
+.carousel-text .eyebrow::before{background:#fff}
+.carousel-text h1{color:#fff;font-size:clamp(2.2rem,4.5vw,3.8rem)}
+.carousel-text h1 em{color:#fff}
+.carousel-text p{color:rgba(255,255,255,0.78);font-size:1.1rem;margin:20px 0 32px;max-width:520px}
+.carousel-text .hero-tag{
+background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);
+color:#fff;font-size:0.78rem;font-weight:700;padding:7px 14px;border-radius:999px
+}
+
+.carousel-controls{
+position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:3;
+display:flex;gap:10px;align-items:center
+}
+.carousel-dot{
+width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.35);
+border:2px solid rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s
+}
+.carousel-dot.active{background:#fff;border-color:#fff;transform:scale(1.3)}
+.carousel-arrow{
+position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.12);
+backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);
+color:#fff;font-size:1.4rem;cursor:pointer;transition:all 0.3s;
+display:flex;align-items:center;justify-content:center
+}
+.carousel-arrow:hover{background:rgba(255,255,255,0.25);transform:translateY(-50%) scale(1.1)}
+.carousel-arrow.prev{left:24px}
+.carousel-arrow.next{right:24px}
+.carousel-slide-info{
+position:absolute;bottom:40px;right:48px;z-index:3;
+color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:0.5px;
+background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);padding:8px 16px;border-radius:999px;
+border:1px solid rgba(255,255,255,0.1)
+}
+.carousel-slide-info strong{color:#fff}
+
+@media(max-width:768px){
+.hero-carousel{height:70vh}
+.carousel-arrow{width:36px;height:36px;font-size:1.1rem}
+.carousel-arrow.prev{left:12px}
+.carousel-arrow.next{right:12px}
+.carousel-slide-info{right:12px;font-size:0.75rem;padding:6px 12px}
+.carousel-controls{bottom:24px}
+}
+
+/* SECTIONS */
+section{padding:100px 0}
+.section-intro{max-width:720px;margin-bottom:56px}
+.section-intro.center{margin-left:auto;margin-right:auto;text-align:center}
+.section-intro p{font-size:1.08rem}
+
+.sobre{background:#f8fbf8;position:relative}
+.sobre::before{
+content:'';position:absolute;top:0;left:0;right:0;height:4px;
+background:linear-gradient(90deg,var(--mrv-deep),var(--mrv-bright),var(--mrv-orange))
+}
+.faixas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:50px}
+.faixa-card{
+background:var(--cream);border-radius:16px;padding:32px 28px;
+border-top:4px solid var(--mrv-bright);transition:transform 0.3s,box-shadow 0.3s
+}
+.faixa-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,131,62,0.1)}
+.faixa-card .faixa-num{font-family:'Fraunces',serif;font-size:2.3rem;color:var(--mrv-green)}
+.faixa-card h3{font-size:1.15rem;margin:10px 0 10px}
+.faixa-card p{font-size:0.95rem}
+@media(max-width:800px){.faixas-grid{grid-template-columns:1fr}}
+
+.projetos{background:linear-gradient(180deg,#f0f7f0 0%,#fff 100%)}
+.projetos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:50px}
+
+/* PROJECT CARD */
+.projeto-card{
+background:#fff;border-radius:20px;overflow:hidden;
+box-shadow:0 4px 24px rgba(21,19,15,0.06);
+transition:all 0.5s cubic-bezier(.25,.46,.45,.94);
+display:flex;flex-direction:column;
+border:1px solid rgba(0,131,62,0.06)
+}
+.projeto-card:hover{
+transform:translateY(-8px);box-shadow:0 32px 64px rgba(0,131,62,0.15);
+border-color:rgba(0,131,62,0.18)
+}
+
+/* GALLERY */
+.projeto-gallery{
+position:relative;aspect-ratio:5/3;overflow:hidden;
+background:var(--mrv-deep)
+}
+.projeto-gallery img{
+width:100%;height:100%;object-fit:cover;transition:transform 0.7s
+}
+.projeto-card:hover .projeto-gallery img{transform:scale(1.1)}
+.gallery-placeholder{
+width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+flex-direction:column;gap:6px;
+background:linear-gradient(135deg,var(--mrv-deep),var(--mrv-green));
+color:rgba(255,255,255,0.7);font-weight:600;font-size:0.82rem;text-align:center
+}
+.gallery-placeholder .ph-icon{font-size:2.4rem;opacity:0.5}
+
+.projeto-tag{
+position:absolute;top:14px;left:14px;z-index:3;
+background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+color:var(--mrv-deep);padding:5px 12px;border-radius:999px;
+font-size:0.7rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;
+box-shadow:0 2px 8px rgba(0,0,0,0.1)
+}
+.projeto-launch{
+position:absolute;top:14px;right:14px;z-index:3;
+background:linear-gradient(135deg,var(--mrv-orange),#e85a28);
+color:#fff;padding:5px 12px;border-radius:999px;
+font-size:0.7rem;font-weight:800;box-shadow:0 2px 8px rgba(255,107,53,0.3)
+}
+
+/* GALLERY INFO OVERLAY (name on image) */
+.projeto-gallery-info{
+position:absolute;bottom:0;left:0;right:0;z-index:2;
+padding:48px 18px 14px;
+background:linear-gradient(transparent 0%,rgba(0,0,0,0.7) 70%,rgba(0,0,0,0.85) 100%);
+pointer-events:none
+}
+.projeto-gallery-info .projeto-localizacao{
+color:rgba(255,255,255,0.65);font-weight:700;margin-bottom:2px;
+font-size:0.72rem;text-transform:uppercase;letter-spacing:1.2px
+}
+.projeto-gallery-info h3{color:#fff;font-size:1.25rem;margin:0}
+.projeto-gallery-info h3 em{color:var(--mrv-bright);font-style:italic}
+
+/* VIDEO PLAY BUTTON */
+.video-play-btn{
+position:absolute;top:50%;left:50%;z-index:4;
+transform:translate(-50%,-50%);
+width:56px;height:56px;border-radius:50%;border:3px solid #fff;
+background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);
+color:#fff;font-size:1.3rem;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+transition:all 0.3s;padding:0;line-height:1
+}
+.video-play-btn.hover-active{
+  background:var(--mrv-green);transform:translate(-50%,-50%) scale(1.15);
+  box-shadow:0 0 40px rgba(0,131,62,0.5);animation:video-pulse 1s ease-in-out infinite
+}
+@keyframes video-pulse{0%,100%{box-shadow:0 0 20px rgba(0,131,62,0.3)}50%{box-shadow:0 0 50px rgba(0,131,62,0.7)}}
+.video-play-btn:hover{
+background:var(--mrv-green);transform:translate(-50%,-50%) scale(1.1);
+box-shadow:0 0 30px rgba(0,131,62,0.4)
+}
+
+.projeto-body{padding:18px 20px 22px;flex:1;display:flex;flex-direction:column;
+background:rgba(255,255,255,0.85);backdrop-filter:blur(2px)}
+.projeto-localizacao{
+color:var(--mrv-green);font-weight:700;margin-bottom:6px;
+font-size:0.78rem;text-transform:uppercase;letter-spacing:1px
+}
+.projeto-card h3{margin-bottom:10px;font-size:1.35rem}
+.projeto-descricao{font-size:0.9rem;margin-bottom:16px;flex:1;line-height:1.55;color:var(--ink-soft)}
+
+.projeto-specs{
+display:grid;grid-template-columns:1fr 1fr;gap:12px;
+margin-bottom:16px;padding:14px 0;
+border-top:1px solid var(--line);border-bottom:1px solid var(--line)
+}
+.spec-label{
+color:var(--mrv-green);font-weight:800;display:block;margin-bottom:2px;
+font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px
+}
+.spec-value{color:var(--ink);font-weight:600;font-size:0.86rem}
+
+.projeto-card a.cta-link{
+color:#fff;background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+text-decoration:none;font-weight:700;font-size:0.88rem;text-align:center;
+padding:12px;border-radius:12px;transition:all 0.25s;
+box-shadow:0 4px 16px rgba(0,131,62,0.2)
+}
+.projeto-card a.cta-link:hover{
+background:var(--mrv-deep);transform:translateY(-2px);
+box-shadow:0 6px 20px rgba(0,88,44,0.3)
+}
+.projeto-card .planta-link{
+display:inline-block;font-size:0.78rem;color:var(--mrv-green);
+font-weight:700;text-decoration:none;margin-bottom:10px;
+transition:color 0.2s
+}
+.projeto-card .planta-link:hover{color:var(--mrv-orange)}
+
+@media(max-width:980px){.projetos-grid{grid-template-columns:1fr}}
+
+/* MAP */
+.mapa-section{background:#fff;padding:80px 0}
+#mapa-mrv{height:480px;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(21,19,15,0.08);margin-top:40px;z-index:1;position:relative}
+.leaflet-popup-content-wrapper{border-radius:14px!important;border-left:4px solid var(--mrv-green);box-shadow:0 8px 28px rgba(0,0,0,0.2)!important}
+.leaflet-popup-content{margin:14px 18px!important;font-family:'Inter',sans-serif!important;font-size:0.92rem!important;color:#1a1a1a!important;line-height:1.5!important;font-weight:500!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#fff!important}
+.leaflet-popup-content strong{color:var(--mrv-deep);font-size:1rem;font-weight:700}
+.map-popup-btn{
+display:inline-block;margin-top:10px;background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+color:#fff;padding:8px 18px;border-radius:999px;text-decoration:none;
+font-size:0.82rem;font-weight:700;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,131,62,0.25)
+}
+.map-popup-btn:hover{background:var(--mrv-deep);transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,88,44,0.35)}
+
+/* PARCEIRO STRIP */
+.parceiro-strip{
+background:linear-gradient(135deg,var(--mrv-deep),var(--mrv-green));
+color:#fff;padding:64px 0;position:relative;overflow:hidden
+}
+.parceiro-strip::before{
+content:'';position:absolute;top:-50%;right:-20%;width:500px;height:500px;
+border-radius:50%;background:rgba(255,255,255,0.03);pointer-events:none
+}
+.parceiro-grid{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;position:relative;z-index:1}
+.parceiro-grid h2{color:#fff;font-size:clamp(1.7rem,3vw,2.3rem);max-width:560px}
+.parceiro-grid p{color:rgba(255,255,255,0.78);margin-top:12px;max-width:480px}
+.parceiro-strip .cta-button{background:var(--mrv-orange);box-shadow:0 10px 28px rgba(255,107,53,0.3)}
+.parceiro-strip .cta-button:hover{background:#e85a28;transform:translateY(-2px)}
+
+/* FORM */
+.formulario{background:linear-gradient(180deg,#f8fbf8 0%,#fff 100%)}
+.form-intro{text-align:center;margin-bottom:50px}
+.form-intro .eyebrow{display:inline-flex}
+.form-intro h2{margin-bottom:14px}
+
+.formulario-container{
+max-width:600px;margin:0 auto;background:#fff;
+padding:52px;border-radius:24px;
+box-shadow:0 12px 48px rgba(21,19,15,0.06);
+border:2px solid var(--mrv-green);
+position:relative;overflow:hidden
+}
+.formulario-container::before{
+content:'';position:absolute;top:0;left:0;right:0;height:4px;
+background:linear-gradient(90deg,var(--mrv-deep),var(--mrv-bright),var(--mrv-orange))
+}
+
+.form-step{display:none;animation:fadeSlideIn 0.35s ease}
+.form-step.active{display:block}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.progress-bar{height:3px;background:var(--line);margin-bottom:44px;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--mrv-green),var(--mrv-orange));transition:width 0.4s}
+
+.form-step h2{font-size:1.6rem;margin-bottom:30px}
+.form-group{margin-bottom:26px}
+.form-group label{display:block;font-weight:700;margin-bottom:10px;color:var(--ink);font-size:0.92rem}
+.form-group input,.form-group select{
+width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+font-family:inherit;font-size:0.95rem;transition:all 0.3s;background:#fff
+}
+.form-group input:focus,.form-group select:focus{
+outline:none;border-color:var(--mrv-green);box-shadow:0 0 0 4px rgba(0,131,62,0.08)
+}
+
+.radio-group{display:flex;flex-direction:column;gap:12px}
+.radio-option{
+display:flex;align-items:center;gap:12px;padding:16px;
+border:1.5px solid var(--line);border-radius:14px;cursor:pointer;
+background:#fff;transition:all 0.2s
+}
+.radio-option:has(input:checked){
+border-color:var(--mrv-green);background:rgba(0,131,62,0.04);
+box-shadow:0 0 0 3px rgba(0,131,62,0.08)
+}
+.radio-option input{width:18px;height:18px;accent-color:var(--mrv-green)}
+.radio-option strong{display:block;font-size:0.95rem;color:var(--ink)}
+.radio-option .subtitle{font-size:0.82rem;color:var(--ink-soft);font-weight:400}
+
+.form-buttons{display:flex;justify-content:space-between;gap:14px;margin-top:10px}
+.btn-next,.btn-submit{
+background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+color:#fff;border:none;padding:15px 30px;border-radius:999px;
+font-weight:700;cursor:pointer;font-size:0.95rem;transition:all 0.25s;
+box-shadow:0 4px 16px rgba(0,131,62,0.2)
+}
+.btn-next:hover,.btn-submit:hover{background:var(--mrv-deep);transform:translateY(-2px)}
+.btn-previous{
+background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);
+padding:15px 26px;border-radius:999px;font-weight:700;cursor:pointer;font-size:0.95rem;
+transition:all 0.2s
+}
+.btn-previous:hover{border-color:var(--mrv-green);color:var(--mrv-green)}
+
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:30px}
+.summary-item label{font-size:0.78rem;color:var(--mrv-green);font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+.summary-item p{margin:6px 0 0;color:var(--ink);font-weight:600}
+
+.success-message{display:none;text-align:center;padding:30px 10px}
+.success-icon{
+width:60px;height:60px;border-radius:50%;
+background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+color:#fff;display:flex;align-items:center;justify-content:center;
+font-size:28px;margin:0 auto 22px;box-shadow:0 8px 24px rgba(0,131,62,0.25)
+}
+.success-message h2{margin-bottom:14px;color:var(--mrv-deep)}
+
+@media(max-width:768px){
+.formulario-container{padding:34px 22px}
+.form-buttons{flex-direction:column-reverse}
+.form-buttons button{width:100%}
+.summary{grid-template-columns:1fr}
+}
+
+.credit-disclaimer{
+background:linear-gradient(135deg,#f0ede4,#e8e4d8);
+padding:24px 0;font-size:0.76rem;color:#888;text-align:center;line-height:1.7
+}
+.credit-disclaimer a{color:var(--mrv-green)}
+
+/* FOOTER */
+footer{
+background:linear-gradient(180deg,var(--ink),#0d0c0a);
+color:#fff;padding:64px 0 32px;position:relative
+}
+.footer-grid{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;margin-bottom:40px}
+.footer-brand{display:flex;align-items:center;gap:12px}
+.footer-brand strong{font-family:'Fraunces',serif;font-size:1.2rem}
+.footer-col h4{
+font-size:0.76rem;text-transform:uppercase;letter-spacing:1px;
+color:var(--mrv-bright);margin-bottom:14px;position:relative;
+padding-bottom:10px
+}
+.footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:2px;background:var(--mrv-green)}
+.footer-col p,.footer-col a{
+color:rgba(255,255,255,0.55);font-size:0.88rem;text-decoration:none;display:block;margin-bottom:8px;transition:color 0.2s
+}
+.footer-col a:hover{color:#fff;padding-left:4px}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.06);padding-top:26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.footer-bottom p{color:rgba(255,255,255,0.35);font-size:0.8rem}
+
+/* SCROLL ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* GLOW EFFECTS */
+.glow-badge{
+display:inline-flex;align-items:center;gap:6px;
+background:linear-gradient(135deg,var(--mrv-green),var(--mrv-bright));
+color:#fff;padding:6px 16px;border-radius:999px;
+font-size:0.72rem;font-weight:800;letter-spacing:0.5px;
+box-shadow:0 4px 16px rgba(0,131,62,0.3)
+}
+
+/* VIDEO MODAL */
+.video-modal{
+position:fixed;inset:0;z-index:1000;
+background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);
+display:flex;align-items:center;justify-content:center;
+opacity:0;pointer-events:none;transition:opacity 0.4s;padding:24px
+}
+.video-modal.open{opacity:1;pointer-events:auto}
+.video-modal-content{
+position:relative;width:100%;max-width:900px;
+aspect-ratio:16/9;border-radius:16px;overflow:hidden;
+box-shadow:0 32px 80px rgba(0,0,0,0.6);
+transform:scale(0.9);transition:transform 0.4s
+}
+.video-modal.open .video-modal-content{transform:scale(1)}
+.video-modal-content #videoFrame{width:100%;height:100%}
+.video-modal-content #videoFrame iframe{width:100%;height:100%;border:0}
+.video-modal-close{
+position:absolute;top:-44px;right:0;
+background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);
+border:1px solid rgba(255,255,255,0.15);
+color:#fff;width:36px;height:36px;border-radius:50%;
+font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+transition:all 0.2s
+}
+.video-modal-close:hover{background:rgba(255,255,255,0.25);transform:scale(1.1)}
+</style>
+</head>
+<body>
+
+<header>
+<div class="container header-content">
+<a href="#" class="logo-mrv">
+<img src="https://www.mrv.com.br/content/experience-fragments/conhecer/us/en/site/header/master/_jcr_content/root/header_copy/header_logo_image.coreimg.svg/1762870879014/logo-mrv.svg" alt="MRV" class="logo-svg">
+<div class="logo-text">
+<strong>MRV São Paulo</strong>
+<span>Soberano Parcerias</span>
+</div>
+</a>
+<nav>
+<a href="#sobre">Programa</a>
+<a href="#projetos">Empreendimentos</a>
+<a href="#localizacao">Mapa</a>
+<a href="#formulario" class="nav-cta">Quero meu apê</a>
+</nav>
+</div>
+</header>
+
+<!-- HERO CAROUSEL -->
+<section class="hero-carousel" id="hero">
+<div class="carousel-slide active" data-slide="0">
+<img src="https://www.mrv.com.br/content/dam/conhecer/imoveis/sao-paulo/sao-paulo/mirante-do-farol/PPC-MIRANTEDOFAROL-PORTARIA-FINAL-05-05-2026.jpg" alt="Mirante do Farol">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Breve Lançamento</div>
+<h1>Mirante<br><em>do Farol</em></h1>
+<p>Pré-lançamento MRV no Jaguaré, Zona Oeste. 657 unidades de 2 dormitórios com opção de varanda. Ao lado da USP, próximo ao Parque Villa-Lobos e Marginal Pinheiros.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Disponibilidade: Consultar</span>
+<span class="hero-tag">Zona Oeste</span>
+<span class="hero-tag">MCMV / R2V</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Mirante do Farol')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<div class="carousel-slide" data-slide="1">
+<img src="https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/04/WhatsApp-Image-2026-04-24-at-09.32.05.jpeg?w=1400" alt="Nascente Pico dos Marins">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Breve Lançamento</div>
+<h1>Nascente<br><em>Pico dos Marins</em></h1>
+<p>9º empreendimento MRV no bairro planejado Cidade Sete Sóis Pirituba. 320 unidades em 4 torres, 2 dormitórios (32 a 34 m²). Lazer completo.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Disponibilidade: Consultar</span>
+<span class="hero-tag">Zona Norte</span>
+<span class="hero-tag">MCMV Faixa 2</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Nascente Pico dos Marins')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<div class="carousel-slide" data-slide="2">
+<img src="https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/05/Residencial-Silverstone-MRV.jpeg?w=1400" alt="Residencial Silverstone">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Lançamento</div>
+<h1>Residencial<br><em>Silverstone</em></h1>
+<p>Duas torres de 18 pavimentos na Usina Piratininga — Zona Sul. Apartamentos de 2 dormitórios com lazer completo e unidades térreas com quintal privativo.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Restam 298 un.</span>
+<span class="hero-tag">MCMV Faixa 2</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Residencial Silverstone')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<div class="carousel-slide" data-slide="3">
+<img src="https://www.mrv.com.br/content/dam/conhecer/imoveis/sao-paulo/sao-paulo/saint-guilherme/SAINT-GUILHERME_PE_GUARITA_2026_01_16.jpg" alt="Saint Guilherme">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Lançamento</div>
+<h1>Saint<br><em>Guilherme</em></h1>
+<p>Residencial MRV na Vila Guilherme, Zona Norte. Apartamentos de 2 dormitórios com plantas funcionais, lazer completo e fácil acesso à Marginal Tietê.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Restam 134 un.</span>
+<span class="hero-tag">Zona Norte</span>
+<span class="hero-tag">HIS 2 / R2V</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Saint Guilherme')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<div class="carousel-slide" data-slide="4">
+<img src="https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/05/PPC_GRAN-VISTA-ITAQUERA_GUARITA_2025-12-15.jpg?w=1400" alt="Gran Vista Itaquera">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Lançamento</div>
+<h1>Gran Vista<br><em>Itaquera</em></h1>
+<p>Lançamento no complexo Itaquera, Zona Leste. Apartamentos de 2 dormitórios com opção de varanda e vaga. Próximo ao Metrô, Shopping e Parque do Carmo.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Restam 205 un.</span>
+<span class="hero-tag">Zona Leste</span>
+<span class="hero-tag">HIS 2 / R2V</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Gran Vista Itaquera')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<div class="carousel-slide" data-slide="5">
+<img src="https://www.mrv.com.br/content/dam/conhecer/imoveis/sao-paulo/sao-paulo/san-miller/SM_PPC_PORTARIA_FINAL1255b47b6-f3b9-40ae-827e-59fb534bb425.jpeg" alt="San Miller">
+<div class="carousel-overlay"></div>
+<div class="container carousel-content">
+<div class="carousel-text">
+<div class="eyebrow">Lançamento</div>
+<h1>San<br><em>Miller</em></h1>
+<p>Residencial MRV no Jardim Brasil, Zona Norte. Apartamentos de 2 dormitórios com opção de vaga. Próximo a avenidas principais e estações de trem.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+<span class="hero-tag">Restam 85 un.</span>
+<span class="hero-tag">Zona Norte</span>
+<span class="hero-tag">HIS 2 / R2V</span>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('San Miller')">Quero saber mais →</button>
+</div>
+</div>
+</div>
+
+<button class="carousel-arrow prev" onclick="moveSlide(-1)">‹</button>
+<button class="carousel-arrow next" onclick="moveSlide(1)">›</button>
+<div class="carousel-controls" id="carouselDots">
+<span class="carousel-dot active" onclick="goToSlide(0)"></span>
+<span class="carousel-dot" onclick="goToSlide(1)"></span>
+<span class="carousel-dot" onclick="goToSlide(2)"></span>
+<span class="carousel-dot" onclick="goToSlide(3)"></span>
+<span class="carousel-dot" onclick="goToSlide(4)"></span>
+<span class="carousel-dot" onclick="goToSlide(5)"></span>
+</div>
+<div class="carousel-slide-info">Imagem: <strong>Divulgação MRV</strong></div>
+</section>
+
+<section class="sobre" id="sobre">
+<div class="container">
+<div class="section-intro fade-up">
+<div class="eyebrow">Por que MRV + MCMV</div>
+<h2>O programa do governo,<br><em>na prática</em></h2>
+<p>O Minha Casa Minha Vida organiza o financiamento por faixa de renda. A MRV é a construtora que mais entrega unidades dentro do programa no Brasil.</p>
+</div>
+<div class="faixas-grid">
+<div class="faixa-card fade-up">
+<div class="faixa-num">01</div>
+<h3>Faixa 1</h3>
+<p>Famílias com renda mensal de até R$ 2.850. Maior subsídio do programa, prioridade para quem busca o primeiro imóvel.</p>
+</div>
+<div class="faixa-card fade-up">
+<div class="faixa-num">02</div>
+<h3>Faixa 2</h3>
+<p>Renda de até R$ 4.700. Subsídio combinado com financiamento facilitado e taxas reduzidas pela Caixa.</p>
+</div>
+<div class="faixa-card fade-up">
+<div class="faixa-num">03</div>
+<h3>Faixa 3 / 4</h3>
+<p>Renda de até R$ 12.000. Condições facilitadas mesmo sem subsídio integral — ideal para sair do aluguel.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="projetos" id="projetos">
+<div class="container">
+<div class="section-intro center fade-up">
+<div class="eyebrow">Carteira atual · Grande SP</div>
+<h2>Empreendimentos em<br><em>destaque</em></h2>
+<p>Passe o mouse sobre as imagens para ver mais ângulos de cada projeto.</p>
+</div>
+<div class="projetos-grid" id="projetosGrid"></div>
+</div>
+</section>
+
+<section class="mapa-section" id="localizacao">
+<div class="container">
+<div class="section-intro center fade-up">
+<div class="eyebrow">Onde estamos</div>
+<h2>Encontre o MRV<br><em>mais perto de você</em></h2>
+<p>Clique nos pins para ver os empreendimentos MRV espalhados por São Paulo — Zonas Sul, Norte, Leste e Oeste.</p>
+</div>
+<div id="mapa-mrv"></div>
+<div style="display:flex;gap:20px;justify-content:center;margin-top:16px;flex-wrap:wrap;font-size:0.85rem;">
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#0066CC;display:inline-block;"></span>Zona Sul</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#E67E22;display:inline-block;"></span>Zona Norte</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#8E44AD;display:inline-block;"></span>Zona Leste</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#E74C3C;display:inline-block;"></span>Zona Oeste</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#1ABC9C;display:inline-block;"></span>Guarulhos</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#E91E63;display:inline-block;"></span>Osasco</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#F39C12;display:inline-block;"></span>Vale do Paraíba</span>
+<span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#95A5A6;display:inline-block;"></span>Grande SP</span>
+</div>
+</div>
+</section>
+
+<section class="parceiro-strip">
+<div class="container parceiro-grid">
+<div>
+<h2>É corretor(a)?<br><em>Aqui você vende mais.</em></h2>
+<p>Rede de parceiros Soberano Parcerias MRV: materiais prontos, tabela atualizada e suporte direto.</p>
+</div>
+<button class="cta-button" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'});setProjeto('Sou corretor parceiro')">Quero ser parceiro →</button>
+</div>
+</section>
+
+<section class="formulario" id="formulario">
+<div class="container">
+<div class="form-intro fade-up">
+<span class="eyebrow">Próximo passo</span>
+<h2>Solicite sua <em>simulação</em></h2>
+<p>Leva menos de um minuto — entramos em contato pelo WhatsApp.</p>
+</div>
+</div>
+
+<div class="formulario-container fade-up">
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+
+<form id="contactForm">
+<div class="form-step active" id="step1">
+<h2>Seus dados</h2>
+<div class="form-group">
+<label for="nome">Nome completo</label>
+<input type="text" id="nome" name="nome" required>
+</div>
+<div class="form-group">
+<label for="telefone">WhatsApp</label>
+<input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required>
+</div>
+<div class="form-group">
+<label for="email">E-mail</label>
+<input type="email" id="email" name="email" placeholder="seu@email.com" required>
+</div>
+<div class="form-buttons">
+<span></span>
+<button type="button" class="btn-next" onclick="nextStep()">Continuar →</button>
+</div>
+</div>
+
+<div class="form-step" id="step2">
+<h2>Seu perfil</h2>
+<div class="form-group">
+<label>Você é</label>
+<div class="radio-group">
+<label class="radio-option">
+<input type="radio" name="perfil" value="Quero meu ap\u00EA (uso pr\u00F3prio)" required>
+<span><strong>Quero meu apê</strong><span class="subtitle">Vou usar para morar — pronto pra sair do aluguel</span></span>
+</label>
+<label class="radio-option">
+<input type="radio" name="perfil" value="J\u00E1 tenho FGTS / financiamento aprovado">
+<span><strong>Já tenho FGTS / pré-aprovação</strong><span class="subtitle">Quero acelerar a escolha da unidade</span></span>
+</label>
+<label class="radio-option">
+<input type="radio" name="perfil" value="Sou corretor parceiro">
+<span><strong>Sou corretor(a) parceiro(a)</strong><span class="subtitle">Quero acesso à rede de parcerias MRV</span></span>
+</label>
+<label class="radio-option">
+<input type="radio" name="perfil" value="Outro">
+<span><strong>Outro</strong><span class="subtitle">Ainda estou conhecendo o programa</span></span>
+</label>
+</div>
+</div>
+<div class="form-group">
+<label for="projeto">Qual empreendimento interessa?</label>
+<select id="projeto" name="projeto">
+<option value="">Selecione</option>
+<optgroup label="Zona Sul">
+<option value="Residencial Silverstone">Residencial Silverstone</option>
+<option value="Residencial Estoril">Residencial Estoril</option>
+<option value="Parque Holandês">Parque Holandês</option>
+<option value="Residencial Liviero">Residencial Liviero</option>
+</optgroup>
+<optgroup label="Zona Norte">
+<option value="Saint Guilherme">Saint Guilherme</option>
+<option value="Poente dos Tucanos">Poente dos Tucanos</option>
+<option value="San Miller">San Miller</option>
+<option value="Nascente Pico dos Marins">Nascente Pico dos Marins</option>
+<option value="Recanto do Limoeiro">Recanto do Limoeiro</option>
+<option value="Poente das Bromélias">Poente das Bromélias</option>
+</optgroup>
+<optgroup label="Zona Leste">
+<option value="Residencial Ipês">Residencial Ipês</option>
+<option value="Gran Vista Itaquera">Gran Vista Itaquera</option>
+<option value="Spazio Saint Francis">Spazio Saint Francis</option>
+<option value="San Toledo">San Toledo</option>
+<option value="Gran Arena Itaquera">Gran Arena Itaquera</option>
+<option value="Recanto da Mata">Recanto da Mata</option>
+<option value="Saint Virginia">Saint Virginia</option>
+<option value="Saint Rose">Saint Rose</option>
+</optgroup>
+<optgroup label="Zona Oeste">
+<option value="Mirante do Farol">Mirante do Farol</option>
+<option value="Residencial Vivenza">Residencial Vivenza</option>
+<option value="Ritmos da Barra">Ritmos da Barra</option>
+</optgroup>
+<option value="Todos">Informações de todos</option>
+</select>
+</div>
+<div class="form-buttons">
+<button type="button" class="btn-previous" onclick="previousStep()">← Voltar</button>
+<button type="button" class="btn-next" onclick="nextStep()">Continuar →</button>
+</div>
+</div>
+
+<div class="form-step" id="step3">
+<h2>Confirmação</h2>
+<div class="summary">
+<div class="summary-item"><label>Nome</label><p id="summaryNome">—</p></div>
+<div class="summary-item"><label>WhatsApp</label><p id="summaryTelefone">—</p></div>
+<div class="summary-item"><label>E-mail</label><p id="summaryEmail">—</p></div>
+<div class="summary-item"><label>Perfil</label><p id="summaryPerfil">—</p></div>
+<div class="summary-item"><label>Empreendimento</label><p id="summaryProjeto">—</p></div>
+</div>
+<div class="form-buttons">
+<button type="button" class="btn-previous" onclick="previousStep()">← Voltar</button>
+<button type="submit" class="btn-submit">Enviar solicitação</button>
+</div>
+</div>
+
+<div class="success-message" id="successMessage">
+<div class="success-icon">✓</div>
+<h2>Dados recebidos</h2>
+<p>Entraremos em contato via WhatsApp em breve.</p>
+<p style="margin-top:16px;color:var(--ink-soft);font-size:0.92rem;">Condições sujeitas a análise de crédito e disponibilidade de unidades no programa Minha Casa Minha Vida.</p>
+</div>
+</form>
+</div>
+</section>
+
+<div class="credit-disclaimer">
+<div class="container">
+Imagens: Divulgação MRV · Silverstone (CNN Brasil), Holandês (ghar.com.br), Estoril (residencialestoril.com.br), Saint Guilherme (MRV CDN), Poente dos Tucanos (MRV CDN), San Miller (MRV CDN), Ipês (MRV CDN), Gran Vista Itaquera (CNN Brasil), Spazio Saint Francis (MRV CDN), Pico dos Marins (CNN Brasil), Mirante do Farol (MRV CDN), Vivenza (MRV CDN), Liviero (MRV CDN), Limoeiro (MRV CDN), San Toledo (MRV CDN), Gran Arena Itaquera (MRV CDN), Recanto da Mata (MRV CDN), Saint Virginia (MRV CDN), Saint Rose (MRV CDN), Ritmos da Barra (MRV CDN), Poente das Bromélias (MRV CDN).<br>
+Valores e condições sujeitos a alteração. Consulte disponibilidade no momento da simulação.
+</div>
+</div>
+
+<footer>
+<div class="container">
+<div class="footer-grid">
+<div class="footer-col" style="max-width:280px;">
+<div class="footer-brand">
+<img src="https://www.mrv.com.br/content/experience-fragments/conhecer/us/en/site/header/master/_jcr_content/root/header_copy/header_logo_image.coreimg.svg/1762870879014/logo-mrv.svg" alt="MRV" style="width:32px;height:32px;filter:brightness(0)invert(1);opacity:0.85;">
+<strong>Soberano Parcerias MRV</strong>
+</div>
+<p style="margin-top:16px;">Gerência de Parcerias MRV — Zonas Sul, Norte, Leste e Oeste de São Paulo.</p>
+</div>
+<div class="footer-col">
+<h4>Zona Sul</h4>
+<a href="#projetos" onclick="setProjeto('Residencial Silverstone')">Residencial Silverstone</a>
+<a href="#projetos" onclick="setProjeto('Residencial Estoril')">Residencial Estoril</a>
+<a href="#projetos" onclick="setProjeto('Parque Holandês')">Parque Holandês</a>
+<a href="#projetos" onclick="setProjeto('Residencial Liviero')">Residencial Liviero</a>
+</div>
+<div class="footer-col">
+<h4>Zona Norte</h4>
+<a href="#projetos" onclick="setProjeto('Saint Guilherme')">Saint Guilherme</a>
+<a href="#projetos" onclick="setProjeto('Poente dos Tucanos')">Poente dos Tucanos</a>
+<a href="#projetos" onclick="setProjeto('San Miller')">San Miller</a>
+<a href="#projetos" onclick="setProjeto('Nascente Pico dos Marins')">Pico dos Marins</a>
+<a href="#projetos" onclick="setProjeto('Recanto do Limoeiro')">Recanto do Limoeiro</a>
+</div>
+<div class="footer-col">
+<h4>Zona Leste</h4>
+<a href="#projetos" onclick="setProjeto('Residencial Ipês')">Residencial Ipês</a>
+<a href="#projetos" onclick="setProjeto('Gran Vista Itaquera')">Gran Vista Itaquera</a>
+<a href="#projetos" onclick="setProjeto('Spazio Saint Francis')">Spazio Saint Francis</a>
+<a href="#projetos" onclick="setProjeto('San Toledo')">San Toledo</a>
+<a href="#projetos" onclick="setProjeto('Gran Arena Itaquera')">Gran Arena Itaquera</a>
+<a href="#projetos" onclick="setProjeto('Recanto da Mata')">Recanto da Mata</a>
+<a href="#projetos" onclick="setProjeto('Saint Virginia')">Saint Virginia</a>
+<a href="#projetos" onclick="setProjeto('Saint Rose')">Saint Rose</a>
+</div>
+<div class="footer-col">
+<h4>Zona Oeste</h4>
+<a href="#projetos" onclick="setProjeto('Mirante do Farol')">Mirante do Farol</a>
+<a href="#projetos" onclick="setProjeto('Residencial Vivenza')">Residencial Vivenza</a>
+</div>
+<div class="footer-col">
+<h4>Contato</h4>
+<a href="#formulario">Solicitar simulação</a>
+<a href="#formulario">Rede de parceiros</a>
+</div>
+</div>
+<div class="footer-bottom">
+<p>MRV — Programa Minha Casa Minha Vida. Condições sujeitas a análise de crédito.</p>
+<p>© 2026 MRV. Página atualizada em 30/06/2026.</p>
+</div>
+</div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== PROJECT DATA =====
+const projData = [
+{id:'Residencial Silverstone',name1:'Residencial',name2:'Silverstone',zone:'Zona Sul',tag:'Usina Piratininga',launch:'Lançamento 2026',
+desc:'Duas torres de 18 pavimentos com 432 unidades de 2 dormitórios (35 a 40 m²). Unidades térreas com quintal privativo. Lazer completo.',
+specs:{plantas:'2 dorm. 35-40 m²',programa:'HIS-2',restam:'99 un.',vaga:'Sim'},
+images:['https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/05/Residencial-Silverstone-MRV.jpeg?w=800'],
+labels:['Fachada'],video:'https://www.youtube.com/watch?v=mzgeJyMn1k4',coords:[-23.68885,-46.68814]},
+{id:'Residencial Olímpia',name1:'Residencial',name2:'Olímpia',zone:'Osasco',tag:'Conceição',launch:'Em construção',
+desc:'Residencial MRV em Osasco. 181 unidades de 2 dormitórios (39 a 42 m²) com opção de vaga. 73,5% concluído, entrega ABR/27. Próximo à Av. Victor Civita.',
+specs:{plantas:'2 dorm. 39-42 m²',programa:'HIS 2',restam:'181 un.',vaga:'Sim'},
+images:['https://api.apto.vc/images/realties/8056/residencial-olimpia-condominio-1.jpg'],
+labels:['Fachada'],video:null,coords:[-23.534,-46.775]},
+{id:'Parque Holandês',name1:'Parque',name2:'Holandês',zone:'Zona Sul',tag:'Cidade Ademar',launch:'Em construção',
+desc:'Torre única com 283 unidades de 2 dormitórios (35 a 36 m²), com e sem varanda. Lazer completo e área gourmet. A 200 m da Av. Cupecê.',
+specs:{plantas:'2 dorm. 33-35 m²',programa:'HIS 2 / R2V',restam:'191 un.',vaga:'—'},
+images:['https://ghar.com.br/wp-content/uploads/2026/01/parque-holandes-cidade-ademar-condominio-apartamentos-mrv-fachada-portaria-08.webp'],
+labels:['Fachada'],planta:null,coords:[-23.66937,-46.65879]},
+{id:'Residencial Estoril',name1:'Residencial',name2:'Estoril',zone:'Zona Sul',tag:'Interlagos',launch:'Vendendo rápido',
+desc:'Parte do complexo Grand Prix Interlagos. 1.080 unidades de 2 dormitórios (38 a 40 m²), 13 espaços de lazer.',
+specs:{plantas:'2 dorm. 35-40 m²',programa:'MCMV Faixa 2/3',restam:'50 un.',vaga:'Sim'},
+images:['https://residencialestoril.com.br/wp-content/uploads/2025/02/INT_ESTORIL_SALA_COZINHA_2024.09.03.jpg'],
+labels:['Sala decorada'],video:'https://www.youtube.com/watch?v=bGB6JYTN2Uw',planta:null,coords:[-23.69117,-46.67819]},
+{id:'Residencial Liviero',name1:'Residencial',name2:'Liviero',zone:'Zona Sul',tag:'Sacomã',launch:'Em construção',
+desc:'6 torres com 709 unidades de 2 dormitórios (34 m²) no Sacomã. Lazer completo e fácil acesso à Av. Ricardo Jafet.',
+specs:{plantas:'2 dorm. 34 m²',programa:'MCMV',restam:'51 un.',vaga:'—'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=4cRNOUWRn3o',planta:null,coords:[-23.622,-46.604]},
+// ---- ZONA NORTE ----
+{id:'Saint Guilherme',name1:'Saint',name2:'Guilherme',zone:'Zona Norte',tag:'Vila Guilherme',launch:'Lançamento 2026',
+desc:'Residencial MRV na Vila Guilherme. 408 unidades de 2 dormitórios (35 a 37 m²) com opção de varanda. Lazer completo: piscina, academia, coworking. Fácil acesso à Marginal Tietê.',
+specs:{plantas:'2 dorm. 35-37 m²',programa:'HIS 2 / R2V',restam:'134 un.',vaga:'—'},
+images:['gallery-placeholder'],labels:['Guarita'],
+video:'https://www.youtube.com/watch?v=EznlxoXi1b8',coords:[-23.51409,-46.60818]},
+{id:'San Miller',name1:'San',name2:'Miller',zone:'Zona Norte',tag:'JD Brasil',launch:'Em construção',
+desc:'Residencial MRV no Jardim Brasil, Zona Norte. 2 dormitórios (32 a 34 m²) com opção de vaga. Próximo a avenidas e estações de trem.',
+specs:{plantas:'2 dorm. 32-34 m²',programa:'HIS 2 / R2V',restam:'85 un.',vaga:'Sim'},
+images:['gallery-placeholder'],labels:['Portaria'],
+video:'https://www.youtube.com/watch?v=oascGKTQs-M',coords:[-23.47905,-46.57794]},
+{id:'Nascente Pico dos Marins',name1:'Nascente',name2:'Pico dos Marins',zone:'Zona Norte',tag:'Pirituba',launch:'Lançamento 2026',
+desc:'9º empreendimento MRV no bairro planejado Cidade Sete Sóis Pirituba. 320 unidades em 4 torres, 2 dormitórios (32 a 34 m²). Lazer completo.',
+specs:{plantas:'2 dorm. 32-34 m²',programa:'MCMV Faixa 2',restam:'104 un.',vaga:'Sim'},
+images:['https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/04/WhatsApp-Image-2026-04-24-at-09.32.05.jpeg?w=800'],
+labels:['Render'],planta:null,coords:[-23.4580,-46.7400]},
+{id:'Poente dos Tucanos',name1:'Poente',name2:'dos Tucanos',zone:'Zona Norte',tag:'Pirituba',launch:'Em construção',
+desc:'Lançamento no Jardim Cidade Pirituba. 2 dormitórios (32 a 34 m²) com opção de vaga. Condomínio com lazer, segurança e comércio local.',
+specs:{plantas:'2 dorm. 32-34 m²',programa:'HIS 2 / R2V',restam:'166 un.',vaga:'Sim'},
+images:['https://ghar.com.br/wp-content/uploads/2026/01/residencial-poente-dos-tucanos-pirituba-condominio-apartamentos-fachada-portaria-08.webp'],labels:['Fachada'],
+planta:null,coords:[-23.48073,-46.73221]},
+{id:'Poente das Bromélias',name1:'Poente',name2:'das Bromélias',zone:'Zona Norte',tag:'Pirituba',launch:'Em construção',
+desc:'Smartcidade Cidade Sete Sóis. 2 torres com 200 unidades de 2 dormitórios (38 a 44 m²) com opção de suíte e vaga. Lazer completo: piscinas, academia, coworking e pet place.',
+specs:{plantas:'2 dorm. 38-44 m²',programa:'HMP / R2V',restam:'68 un.',vaga:'Sim'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=Q4ZkbfPx6K0',planta:null,coords:[-23.457,-46.728]},
+{id:'Residencial Nascente do Jequitibá',name1:'Nascente',name2:'do Jequitibá',zone:'Zona Norte',tag:'Pirituba',launch:'Em construção',
+desc:'Residencial MRV na Cidade Sete Sóis Pirituba. 240 unidades de 2 dormitórios (32 a 34 m²). Lazer: playground, churrasqueira, salão de festas, pet place. Próximo à CPTM Pirituba.',
+specs:{plantas:'2 dorm. 32-34 m²',programa:'HIS 2 / R2V',restam:'2 un.',vaga:'—'},
+images:['https://api.apto.vc/images/realties/9722/nascente-do-jequitiba-condominio-1.jpg'],
+labels:['Fachada'],planta:null,coords:[-23.460,-46.735]},
+{id:'Residencial Nascente Sempre Viva',name1:'Nascente',name2:'Sempre Viva',zone:'Zona Norte',tag:'Pirituba',launch:'Últimas unidades',
+desc:'Residencial na Cidade Sete Sóis Pirituba. 2 dormitórios (32 a 71 m²). 93,2% concluído, entrega NOV/26. Lazer completo. Últimas 2 unidades.',
+specs:{plantas:'2 dorm. 32-71 m²',programa:'HIS 2 / R2V',restam:'2 un.',vaga:'Sim'},
+images:['https://api.apto.vc/images/realties/6825/residencial-nascente-sempre-viva-condominio-1.jpg'],
+labels:['Fachada'],planta:null,coords:[-23.458,-46.732]},
+{id:'Residencial Poente do Buriti',name1:'Poente',name2:'do Buriti',zone:'Zona Norte',tag:'Pirituba',launch:'Em construção',
+desc:'Residencial MRV na Cidade Sete Sóis Pirituba. 2 dormitórios (32 m²). 84,9% concluído, entrega MAI/27. Salão de festas, espaço gourmet, playground, bicicletário.',
+specs:{plantas:'2 dorm. 32 m²',programa:'HIS 2 / R2V',restam:'Consultar',vaga:'—'},
+images:['https://ghar.com.br/wp-content/uploads/2026/02/residencial-poente-do-buriti-pirituba-condominio-apartamentos-fachada-portaria-03.webp'],labels:['Fachada'],planta:null,coords:[-23.456,-46.730]},
+{id:'Residencial Poente das Orquídeas',name1:'Poente',name2:'das Orquídeas',zone:'Zona Norte',tag:'Pirituba',launch:'Últimas unidades',
+desc:'Residencial na Cidade Sete Sóis Pirituba. 2 dormitórios (21 a 36 m²). 75,7% concluído, entrega SET/27. Lazer completo. Últimas 2 unidades.',
+specs:{plantas:'2 dorm. 21-36 m²',programa:'HIS 2 / R2V',restam:'2 un.',vaga:'—'},
+images:['https://ghar.com.br/wp-content/uploads/2026/02/residencial-poente-das-orquideas-pirituba-condominio-apartamentos-fachada-vista-drone-07.webp'],labels:['Fachada'],planta:null,coords:[-23.462,-46.734]},
+{id:'Recanto do Limoeiro',name1:'Recanto',name2:'do Limoeiro',zone:'Zona Norte',tag:'Limão',launch:'Em construção',
+desc:'5 torres com 560 unidades de 2 dormitórios (34 a 35 m²) no Limão. Lazer completo e portaria 24h.',
+specs:{plantas:'2 dorm. 34-35 m²',programa:'HIS 2 / R2V',restam:'143 un.',vaga:'Sim'},
+images:['https://ghar.com.br/wp-content/uploads/2026/01/recanto-do-limoeiro-limao-condominio-apartamentos-mrv-fachada-09.webp'],labels:['Fachada'],planta:null,coords:[-23.503,-46.658]},
+{id:'Ritmos da Barra',name1:'Ritmos',name2:'da Barra',zone:'Zona Norte',tag:'Barra Funda',launch:'Últimas unidades',
+desc:'Torre única com 288 unidades de 2 dormitórios (34 m²) na Barra Funda. 93,1% concluído, entrega FEV/27. Lazer completo, próximo ao Metrô Barra Funda.',
+specs:{plantas:'2 dorm. 34 m²',programa:'HIS 2 / HMP',restam:'1 un.',vaga:'—'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=yTHmvXJGQTg',planta:null,coords:[-23.524,-46.656]},
+// ---- ZONA OESTE ----
+{id:'Mirante do Farol',name1:'Mirante',name2:'do Farol',zone:'Zona Oeste',tag:'Jaguaré',launch:'Pré-Lançamento',
+ desc:'Pré-lançamento MRV no Jaguaré, ao lado da USP. 657 unidades, 2 dormitórios com opção de varanda. Próximo ao Parque Villa-Lobos, Estação Villa-Lobos Jaguaré e Marginal Pinheiros.',
+ specs:{plantas:'2 dorm. 33-36 m²',programa:'MCMV / R2V',restam:'Consultar',vaga:'Sim'},
+ images:['https://www.mrv.com.br/content/dam/conhecer/imoveis/sao-paulo/sao-paulo/mirante-do-farol/PPC-MIRANTEDOFAROL-PORTARIA-FINAL-05-05-2026.jpg'],labels:['Portaria'],planta:null,coords:[-23.54300,-46.74439]},
+{id:'Residencial Vivenza',name1:'Residencial',name2:'Vivenza',zone:'Zona Oeste',tag:'Butantã',launch:'Lançamento 2026',
+desc:'3 torres com 372 unidades de 2 dormitórios (34 a 35,8 m²) com opção de varanda. Lazer completo: academia, coworking, salão de festas, espaço gourmet e playground. Próximo ao metrô Butantã e Raposo Shopping.',
+specs:{plantas:'2 dorm. 34-35 m²',programa:'HIS-2',restam:'213 un.',vaga:'Sim'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=5M25QOyyAk4',coords:[-23.59263,-46.79266]},
+// ---- ZONA LESTE ----
+{id:'Residencial Ipês',name1:'Residencial',name2:'Ipês',zone:'Zona Leste',tag:'VL Cosmopolita',launch:'Lançamento',
+desc:'Amplo residencial na Vila Cosmopolita, Zona Leste. Unidades de 2 dormitórios (33 a 35 m²) com plantas arejadas. Lazer, academia e playground.',
+specs:{plantas:'2 dorm. 33-35 m²',programa:'HIS 2 / HMP / R2V',restam:'410 un.',vaga:'—'},
+images:['gallery-placeholder'],labels:['Guarita'],
+video:'https://www.youtube.com/watch?v=itxHXs5hlAo',coords:[-23.507,-46.430]},
+{id:'Gran Vista Itaquera',name1:'Gran Vista',name2:'Itaquera',zone:'Zona Leste',tag:'Itaquera',launch:'Lançamento 2026',
+desc:'Lançamento no complexo Itaquera, Zona Leste. Apartamentos de 2 dormitórios (33 a 56 m²) com opção de varanda e vaga. Próximo ao Metrô Itaquera.',
+specs:{plantas:'2 dorm. 33-56 m²',programa:'HIS 2 / R2V',restam:'205 un.',vaga:'Sim'},
+images:['https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/05/PPC_GRAN-VISTA-ITAQUERA_GUARITA_2025-12-15.jpg?w=800'],
+labels:['Guarita'],planta:null,coords:[-23.54761,-46.47686]},
+{id:'Spazio Saint Francis',name1:'Spazio',name2:'Saint Francis',zone:'Zona Leste',tag:'São Mateus',launch:'Lançamento 2026',
+ desc:'Torre única de 23 andares com 288 unidades de 2 dormitórios (33 a 35 m²) em São Mateus. Acesso à Estação Jardim Colonial e próximo ao Parque do Carmo.',
+ specs:{plantas:'2 dorm. 33-35 m²',programa:'R2V',restam:'198 un.',vaga:'Sim'},
+ images:['https://betaimages.lopes.com.br/realestate/sml/REB564735/CD210D7D-699B-421A-9740-81913BB03B94.JPG'],labels:['Guarita'],planta:null,coords:[-23.59822,-46.47186]},
+{id:'San Toledo',name1:'San',name2:'Toledo',zone:'Zona Leste',tag:'Jd. Matarazzo',launch:'Lançamento 2026',
+desc:'2 torres com 86 unidades de 2 dormitórios (35 a 40 m²) no Jardim Matarazzo. Próximo à USP Leste e CPTM.',
+specs:{plantas:'2 dorm. 35-40 m²',programa:'HIS-2 HMP',restam:'163 un.',vaga:'Sim'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=GH35o2BLvZU',planta:null,coords:[-23.520,-46.480]},
+{id:'Gran Arena Itaquera',name1:'Gran Arena',name2:'Itaquera',zone:'Zona Leste',tag:'Itaquera',launch:'Em construção',
+desc:'5 torres com 1.064 unidades de 2 dormitórios (33 a 56 m²) em Itaquera. Próximo à Neo Química Arena e Metrô Itaquera.',
+specs:{plantas:'2 dorm. 33-56 m²',programa:'HIS 2',restam:'87 un.',vaga:'Sim'},
+images:['gallery-placeholder'],labels:['Fachada'],
+video:'https://www.youtube.com/watch?v=O4_v_QmwPn8',planta:null,coords:[-23.541,-46.458]},
+{id:'Recanto da Mata',name1:'Recanto',name2:'da Mata',zone:'Zona Leste',tag:'Ermelino Matarazzo',launch:'Em construção',
+desc:'676 unidades de 2 dormitórios (33 a 37 m²) no Ermelino Matarazzo. Próximo à USP Leste e estação CPTM.',
+specs:{plantas:'2 dorm. 33-37 m²',programa:'MCMV',restam:'47 un.',vaga:'—'},
+images:['https://ghar.com.br/wp-content/uploads/2026/02/recanto-da-mata-ermelino-matarazzo-condominio-apartamentos-fachada-portaria-05.webp'],labels:['Fachada'],planta:null,coords:[-23.519,-46.473]},
+{id:'Saint Virginia',name1:'Saint',name2:'Virginia',zone:'Zona Leste',tag:'Itaim Paulista',launch:'Em construção',
+desc:'4 torres com 480 unidades de 2 dormitórios (32 a 34 m²) no Itaim Paulista. Lazer completo. Próximo à estação Jardim Romano.',
+specs:{plantas:'2 dorm. 32-34 m²',programa:'HIS 2 + HMP',restam:'135 un.',vaga:'Sim'},
+images:['https://ghar.com.br/wp-content/uploads/2026/01/saint-virginia-itaim-paulista-condominio-apartamentos-fachada-06.webp'],labels:['Fachada'],planta:null,coords:[-23.489,-46.406]},
+{id:'Saint Rose',name1:'Saint',name2:'Rose',zone:'Zona Leste',tag:'Sapopemba',launch:'Em construção',
+desc:'Residencial MRV na Fazenda da Juta, Sapopemba. 2 dormitórios (33 a 36 m²) com lazer completo.',
+specs:{plantas:'2 dorm. 33-36 m²',programa:'HIS 1 / HIS 2 / R2V',restam:'79 un.',vaga:'Sim'},
+ images:['https://ghar.com.br/wp-content/uploads/2026/01/saint-rose-sapopemba-condominio-apartamentos-mrv-fachada-06.webp'],labels:['Fachada'],planta:null,coords:[-23.602,-46.533]},
+ // ---- GUARULHOS ----
+{id:'Terrazzo Villa Augusta',name1:'Terrazzo',name2:'Villa Augusta',zone:'Guarulhos',tag:'Vila Augusta',launch:'Em construção',
+ desc:'Residencial MRV em Guarulhos. 2 dormitórios (51 a 57 m²) com opção de vaga e varanda. 65,4% concluído, entrega NOV/27. Lazer completo.',
+ specs:{plantas:'2 dorm. 51-57 m²',programa:'SEM LIMITADOR',restam:'10 un.',vaga:'Sim'},
+ images:['https://betaimages.lopes.com.br/realestate/sml/REB334419/FACHADA-DIURNA.png'],labels:['Fachada'],planta:null,coords:[-23.472,-46.536]},
+// ---- VALE DO PARAÍBA ----
+{id:'Residencial Campo di Ravena',name1:'Campo',name2:'di Ravena',zone:'Vale',tag:'SJC / Reserva Vale Real',launch:'Em construção',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (36 a 39 m²). 71,8% concluído, entrega SET/27. Lazer completo.',
+specs:{plantas:'2 dorm. 36-39 m²',programa:'SEM LIMITADOR',restam:'1 un.',vaga:'Sim'},
+images:['https://www.difazioimoveis.com.br/exportacao/fotoscond/20240820T0859290300-56871171.jpg'],labels:['Fachada'],planta:null,coords:[-23.195,-45.882]},
+{id:'Residencial Campo di Espanha',name1:'Campo',name2:'di Espanha',zone:'Vale',tag:'SJC / Reserva Vale Real',launch:'Em construção',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (36 a 39 m²). 42,5% concluído, entrega DEZ/27.',
+specs:{plantas:'2 dorm. 36-39 m²',programa:'SEM LIMITADOR',restam:'86 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2025/08/Campo-di-Espanha-01.webp'],labels:['Fachada'],planta:null,coords:[-23.193,-45.879]},
+{id:'Residencial Caminho das Cerejeiras',name1:'Caminho',name2:'das Cerejeiras',zone:'Vale',tag:'SJC / Reserva Vale Real',launch:'Lançamento 2026',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (40 a 41 m²). Lançamento, entrega OUT/28.',
+specs:{plantas:'2 dorm. 40-41 m²',programa:'SEM LIMITADOR',restam:'78 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2025/10/Caminho-das-Cerejeiras-01.webp'],labels:['Fachada'],planta:null,coords:[-23.191,-45.877]},
+{id:'Residencial Caminho dos Jerivás',name1:'Caminho',name2:'dos Jerivás',zone:'Vale',tag:'SJC / Reserva Vale Real',launch:'Em construção',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (35 a 38 m²). 7,7% concluído, entrega OUT/28.',
+specs:{plantas:'2 dorm. 35-38 m²',programa:'SEM LIMITADOR',restam:'77 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2025/10/Caminho-dos-Jerivas-01.webp'],labels:['Fachada'],planta:null,coords:[-23.192,-46.878]},
+{id:'Residencial Caminho das Pitangueiras',name1:'Caminho',name2:'das Pitangueiras',zone:'Vale',tag:'SJC / Reserva Vale Real',launch:'Lançamento',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (35 a 38 m²). Lançamento.',
+specs:{plantas:'2 dorm. 35-38 m²',programa:'SEM LIMITADOR',restam:'75 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2026/06/Caminho-das-Pitangueiras-01-scaled.webp'],
+labels:['Fachada'],planta:null,coords:[-23.190,-46.876]},
+{id:'Campo do Cerrado',name1:'Campo',name2:'do Cerrado',zone:'Vale',tag:'SJC / Jaguari',launch:'Lançamento 2026',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (35 a 38 m²). Lançamento, entrega FEV/29. Lazer completo.',
+specs:{plantas:'2 dorm. 35-38 m²',programa:'SEM LIMITADOR',restam:'77 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2025/10/Campo-do-Cerrado-01.webp'],labels:['Fachada'],planta:null,coords:[-23.197,-45.885]},
+{id:'Terrazzo Di Dante',name1:'Terrazzo',name2:'Di Dante',zone:'Vale',tag:'SJC / Parque Industrial',launch:'Em construção',
+desc:'Residencial MRV em São José dos Campos. 2 dormitórios (49 a 50 m²). 91,6% concluído, entrega MAI/27.',
+specs:{plantas:'2 dorm. 49-50 m²',programa:'SEM LIMITADOR',restam:'52 un.',vaga:'Sim'},
+images:['https://9imob.com.br/wp-content/uploads/2022/09/terrazo-di-dante.jpg'],labels:['Fachada'],planta:null,coords:[-23.210,-45.878]},
+{id:'Residencial Tibre',name1:'Residencial',name2:'Tibre',zone:'Vale',tag:'Taubaté',launch:'Em construção',
+desc:'Residencial MRV em Taubaté. 2 dormitórios (39 a 44 m²). 25% concluído, entrega MAR/28.',
+specs:{plantas:'2 dorm. 39-44 m²',programa:'SEM LIMITADOR',restam:'170 un.',vaga:'Sim'},
+images:['https://www.difazioimoveis.com.br/admin/imovel/mini/20250415T1527390300-667654351.jpg'],labels:['Fachada'],planta:null,coords:[-23.033,-45.552]},
+{id:'Residencial Tulle',name1:'Residencial',name2:'Tulle',zone:'Vale',tag:'Taubaté',launch:'Lançamento 2026',
+desc:'Residencial MRV em Taubaté. 2 dormitórios (40 m²). Lançamento, entrega MAR/29.',
+specs:{plantas:'2 dorm. 40 m²',programa:'SEM LIMITADOR',restam:'98 un.',vaga:'Sim'},
+images:['https://corretoracristina.com.br/wp-content/uploads/2026/01/Residencial-Tulle-01-scaled.webp'],labels:['Fachada'],planta:null,coords:[-23.027,-45.558]},
+// ---- GRANDE SP ----
+{id:'Residencial Sabiá',name1:'Residencial',name2:'Sabiá',zone:'Grande',tag:'Suzano',launch:'Em construção',
+desc:'Residencial MRV em Suzano. 2 dormitórios (39 m²). 2,1% concluído, entrega MAI/28.',
+specs:{plantas:'2 dorm. 39 m²',programa:'SEM LIMITADOR',restam:'325 un.',vaga:'Sim'},
+images:['https://cdn-imgs.s3.sa-east-1.amazonaws.com/wp-content/uploads/2025/11/residencial-mrv.jpg'],labels:['Fachada'],planta:null,coords:[-23.542,-46.311]},
+{id:'Vistabela Residence',name1:'Vistabela',name2:'Residence',zone:'Grande',tag:'Vargem Grande Paulista',launch:'Lançamento 2026',
+desc:'Residencial MRV em Vargem Grande Paulista. 2 dormitórios (39 m²). Lançamento, entrega NOV/28.',
+specs:{plantas:'2 dorm. 39 m²',programa:'SEM LIMITADOR',restam:'61 un.',vaga:'Sim'},
+images:['https://sacdnmrv.blob.core.windows.net/imoveis/imoveis/upload/Vistabela/VISTABELA%20RESIDENCE_NOVA%20FACHADA_PPC_GUARITA_2025.08.05.jpg'],labels:['Fachada'],planta:null,coords:[-23.605,-47.025]},
+{id:'Mirante da Colina',name1:'Mirante',name2:'da Colina',zone:'Grande',tag:'Itaquaquecetuba',launch:'Em construção',
+desc:'Residencial MRV em Itaquaquecetuba. 2 dormitórios (40 m²). 62,6% concluído, entrega OUT/27.',
+specs:{plantas:'2 dorm. 40 m²',programa:'SEM LIMITADOR',restam:'111 un.',vaga:'Sim'},
+ images:['https://cdn.mrv.com.br/imoveis/upload/imagens/4654/MIRANTEDACOLINA_PPC_GUARITA_FI10cdad2a-e6cf-4bbf-9712-9a6855557b0d.jpeg'],labels:['Fachada'],planta:null,coords:[-23.478,-46.357]}
+];
+
+// ===== YOUTUBE HELPER =====
+function getYouTubeId(url){
+  if(!url)return null;
+  const m=url.match(/(?:v=|\/)([\w-]{11})(?:\?|&|$)/);
+  return m?m[1]:null;
+}
+
+// ===== RENDER PROJECT CARDS =====
+function renderCards(){
+const grid=document.getElementById('projetosGrid');
+projData.forEach((p,i)=>{
+const card=document.createElement('div');
+card.className='projeto-card fade-up';
+
+let galleryHTML='<div class="projeto-gallery">';
+const videoId=p.video?getYouTubeId(p.video):null;
+if(videoId){
+galleryHTML+=`<img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${p.id}" loading="lazy">`;
+}else if(p.images[0]!=='gallery-placeholder'){
+galleryHTML+=`<img src="${p.images[0]}" alt="${p.id}" loading="lazy">`;
+}else{
+galleryHTML+=`<div class="gallery-placeholder"><div class="ph-icon">🏗️</div>${p.labels[0]||'Em breve'}</div>`;
+}
+galleryHTML+=`<span class="projeto-tag">${p.tag}</span>`;
+galleryHTML+=`<span class="projeto-launch">${p.launch}</span>`;
+galleryHTML+=`<div class="projeto-gallery-info"><div class="projeto-localizacao">${p.zone} · São Paulo</div><h3>${p.name1}<br><em>${p.name2}</em></h3></div>`;
+if(p.video){
+galleryHTML+=`<button class="video-play-btn" data-video="${p.video}" aria-label="Ver vídeo">▶</button>`;
+}
+galleryHTML+='</div>';
+
+card.innerHTML=galleryHTML;
+
+const body=document.createElement('div');
+body.className='projeto-body';
+body.innerHTML=`
+<p class="projeto-descricao">${p.desc}</p>
+<div class="projeto-specs">
+<div class="spec"><span class="spec-label">Plantas</span><span class="spec-value">${p.specs.plantas}</span></div>
+<div class="spec"><span class="spec-label">Programa</span><span class="spec-value">${p.specs.programa}</span></div>
+<div class="spec"><span class="spec-label">Restam</span><span class="spec-value">${p.specs.restam}</span></div>
+<div class="spec"><span class="spec-label">Com vaga</span><span class="spec-value">${p.specs.vaga}</span></div>
+</div>
+${p.planta?`<a href="${p.planta}" target="_blank" class="planta-link" onclick="event.stopPropagation()">📐 Ver planta</a>`:''}
+<a href="#formulario" class="cta-link" onclick="setProjeto('${p.id}')">Quero saber mais</a>
+`;
+
+card.appendChild(body);
+if(p.video){
+  card.addEventListener('mouseenter',function(){
+    this.querySelector('.video-play-btn')?.classList.add('hover-active');
+  });
+  card.addEventListener('mouseleave',function(){
+    this.querySelector('.video-play-btn')?.classList.remove('hover-active');
+  });
+}
+grid.appendChild(card);
+});
+}
+
+// ===== VIDEO MODAL =====
+function openVideo(url){
+  const id=getYouTubeId(url);
+  if(!id)return;
+  document.getElementById('videoModal').classList.add('open');
+  const frame=document.getElementById('videoFrame');
+  frame.innerHTML='';
+  const ifr=document.createElement('iframe');
+  ifr.allow='autoplay; encrypted-media; fullscreen';
+  ifr.allowFullscreen=true;
+  ifr.style.cssText='width:100%;height:100%;border:0;border-radius:16px;';
+  ifr.src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  frame.appendChild(ifr);
+}
+function closeVideo(){
+  document.getElementById('videoModal').classList.remove('open');
+  document.getElementById('videoFrame').innerHTML='';
+}
+document.addEventListener('click',function(e){
+const btn=e.target.closest('.video-play-btn');
+if(btn)openVideo(btn.dataset.video);
+});
+// ===== CAROUSEL =====
+let currentSlide=0;
+const slides=document.querySelectorAll('.carousel-slide');
+const dots=document.querySelectorAll('.carousel-dot');
+let autoPlay;
+
+function goToSlide(n){
+slides.forEach(s=>s.classList.remove('active'));
+dots.forEach(d=>d.classList.remove('active'));
+currentSlide=((n%slides.length)+slides.length)%slides.length;
+slides[currentSlide].classList.add('active');
+dots[currentSlide].classList.add('active');
+}
+
+function moveSlide(d){goToSlide(currentSlide+d);resetAutoPlay()}
+
+function resetAutoPlay(){
+clearInterval(autoPlay);
+autoPlay=setInterval(()=>goToSlide(currentSlide+1),5000);
+}
+resetAutoPlay();
+
+document.querySelector('.hero-carousel').addEventListener('mouseenter',()=>clearInterval(autoPlay));
+document.querySelector('.hero-carousel').addEventListener('mouseleave',resetAutoPlay);
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+if(document.querySelector('.hero-carousel:hover')){
+if(e.key==='ArrowLeft')moveSlide(-1);
+if(e.key==='ArrowRight')moveSlide(1);
+}
+});
+
+// ===== MAP =====
+const zoneColors={Sul:'#0066CC',Norte:'#E67E22',Leste:'#8E44AD',Oeste:'#E74C3C',Guarulhos:'#1ABC9C',Osasco:'#E91E63',Vale:'#F39C12',Grande:'#95A5A6'};
+
+function initMap(){
+if(typeof L==='undefined')return;
+const map=L.map('mapa-mrv',{zoomControl:true}).setView([-23.55,-46.62],11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+attribution:'&copy; OpenStreetMap',maxZoom:18
+}).addTo(map);
+
+projData.forEach(p=>{
+const zoneKey=p.zone.replace('Zona ','');
+const color=zoneColors[zoneKey]||'#00833E';
+const inits=p.name1.charAt(0).toUpperCase()+p.name2.split(' ')[0].charAt(0).toUpperCase();
+const icon=L.divIcon({
+className:'mrv-marker',
+html:`<div style="width:28px;height:28px;background:${color};border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;">${inits}</div>`,
+iconSize:[28,28],iconAnchor:[14,14]
+});
+const marker=L.marker(p.coords,{icon}).addTo(map);
+marker.bindPopup(`
+<strong>${p.id}</strong><br>
+<span style="color:#5B564C;font-size:0.85rem;">${p.zone}</span><br>
+<a href="#formulario" class="map-popup-btn" onclick="setProjeto('${p.id}')">Quero saber mais</a>
+`);
+});
+}
+
+// ===== INIT =====
+renderCards();
+initMap();
+
+// ===== SCROLL ANIMATIONS =====
+const observer=new IntersectionObserver(entries=>{
+entries.forEach(e=>{
+if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}
+});
+},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
+
+// ===== FORM =====
+let currentStep=1;
+
+function nextStep(){
+if(currentStep===1){
+if(!document.getElementById('nome').value||!document.getElementById('telefone').value||!document.getElementById('email').value){
+alert('Preencha todos os campos');return;
+}
+}
+if(currentStep===2){
+if(!document.querySelector('input[name="perfil"]:checked')){
+alert('Selecione seu perfil');return;
+}
+updateSummary();
+}
+currentStep++;
+updateFormView();
+}
+
+function previousStep(){currentStep--;updateFormView()}
+
+function updateFormView(){
+document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+document.getElementById('step'+currentStep).classList.add('active');
+const p=(currentStep/3)*100;
+document.getElementById('progressFill').style.width=p+'%';
+document.querySelector('.formulario-container').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function updateSummary(){
+document.getElementById('summaryNome').textContent=document.getElementById('nome').value;
+document.getElementById('summaryTelefone').textContent=document.getElementById('telefone').value;
+document.getElementById('summaryEmail').textContent=document.getElementById('email').value;
+document.getElementById('summaryPerfil').textContent=document.querySelector('input[name="perfil"]:checked').value;
+document.getElementById('summaryProjeto').textContent=document.getElementById('projeto').value||'Não especificado';
+}
+
+function setProjeto(project){
+const select=document.getElementById('projeto');
+const exists=Array.from(select.options).some(o=>o.value===project);
+if(exists)select.value=project;
+document.getElementById('formulario').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+document.getElementById('telefone').addEventListener('input',function(e){
+let v=e.target.value.replace(/\D/g,'');
+if(v.length>0)v='('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7,11);
+e.target.value=v;
+});
+
+document.getElementById('contactForm').addEventListener('submit',async function(e){
+e.preventDefault();
+document.querySelectorAll('.form-step').forEach(s=>s.style.display='none');
+document.querySelector('.progress-bar').style.display='none';
+document.getElementById('successMessage').style.display='block';
+});
+
+</script>
+
+<div id="videoModal" class="video-modal" onclick="if(event.target===this)closeVideo()">
+<div class="video-modal-content">
+<button class="video-modal-close" onclick="closeVideo()">✕</button>
+<div id="videoFrame"></div>
+</div>
+</div>
+
+</body>
+</html>
