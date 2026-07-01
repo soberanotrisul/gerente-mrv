@@ -1118,8 +1118,18 @@ ${p.planta?`<a href="${p.planta}" target="_blank" class="planta-link" onclick="e
 
 card.appendChild(body);
 if(p.video){
+  let hoverTimer;
   card.addEventListener('mouseenter',function(){
-    openVideo(p.video);
+    clearTimeout(hoverTimer);
+    hoverTimer=setTimeout(()=>openVideo(p.video),3000);
+  });
+  card.addEventListener('mouseleave',function(){
+    clearTimeout(hoverTimer);
+  });
+  card.addEventListener('click',function(e){
+    if(!e.target.closest('.video-play-btn')&&!e.target.closest('.cta-link')&&!e.target.closest('.planta-link')){
+      openVideo(p.video);
+    }
   });
 }
 grid.appendChild(card);
