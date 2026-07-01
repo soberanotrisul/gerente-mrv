@@ -1278,8 +1278,13 @@ if(v.length>0)v='('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7,11)
 e.target.value=v;
 });
 
+let submitting=false;
 document.getElementById('contactForm').addEventListener('submit',async function(e){
 e.preventDefault();
+if(submitting)return;
+submitting=true;
+const btn=this.querySelector('.btn-submit');
+if(btn)btn.disabled=true;
 const data={
 timestamp:new Date().toLocaleString('pt-BR'),
 nome:document.getElementById('nome').value,
