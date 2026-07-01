@@ -19,11 +19,11 @@
 ║      || ss.insertSheet('Leads');                             ║
 ║    if (sheet.getLastRow() === 0) {                           ║
 ║      sheet.appendRow(['Timestamp','Nome','WhatsApp',         ║
-║        'Email','Perfil','Empreendimento']);                  ║
+║        'Renda','Região','FGTS?','Família']);                ║
 ║    }                                                         ║
 ║    const d = e.parameter;                                    ║
 ║    sheet.appendRow([d.timestamp,d.nome,d.telefone,           ║
-║      d.email,d.perfil,d.projeto]);                           ║
+║      d.renda,d.regiao,d.fgts,d.pessoas]);                   ║
 ║    return ContentService.createTextOutput('OK');             ║
 ║  }                                                           ║
 ╚══════════════════════════════════════════════════════════════╝
@@ -712,9 +712,9 @@ transition:all 0.2s
 
 <form id="contactForm">
 <div class="form-step active" id="step1">
-<h2>Seus dados</h2>
+<h2>Qualificação rápida</h2>
 <div class="form-group">
-<label for="nome">Nome completo</label>
+<label for="nome">Seu nome</label>
 <input type="text" id="nome" name="nome" required>
 </div>
 <div class="form-group">
@@ -722,8 +722,15 @@ transition:all 0.2s
 <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required>
 </div>
 <div class="form-group">
-<label for="email">E-mail</label>
-<input type="email" id="email" name="email" placeholder="seu@email.com" required>
+<label for="renda">Renda familiar</label>
+<select id="renda" name="renda" required>
+<option value="">Selecione</option>
+<option value="Até R$ 2.850">Faixa 1 — até R$ 2.850</option>
+<option value="Até R$ 4.700">Faixa 2 — até R$ 4.700</option>
+<option value="Até R$ 8.000">Faixa 3 — até R$ 8.000</option>
+<option value="Até R$ 12.000">Faixa 3/4 — até R$ 12.000</option>
+<option value="Acima de R$ 12.000">Acima de R$ 12.000</option>
+</select>
 </div>
 <div class="form-buttons">
 <span></span>
@@ -732,62 +739,43 @@ transition:all 0.2s
 </div>
 
 <div class="form-step" id="step2">
-<h2>Seu perfil</h2>
+<h2>Quase lá</h2>
 <div class="form-group">
-<label>Você é</label>
-<div class="radio-group">
-<label class="radio-option">
-<input type="radio" name="perfil" value="Quero meu ap\u00EA (uso pr\u00F3prio)" required>
-<span><strong>Quero meu apê</strong><span class="subtitle">Vou usar para morar — pronto pra sair do aluguel</span></span>
-</label>
-<label class="radio-option">
-<input type="radio" name="perfil" value="J\u00E1 tenho FGTS / financiamento aprovado">
-<span><strong>Já tenho FGTS / pré-aprovação</strong><span class="subtitle">Quero acelerar a escolha da unidade</span></span>
-</label>
-<label class="radio-option">
-<input type="radio" name="perfil" value="Sou corretor parceiro">
-<span><strong>Sou corretor(a) parceiro(a)</strong><span class="subtitle">Quero acesso à rede de parcerias MRV</span></span>
-</label>
-<label class="radio-option">
-<input type="radio" name="perfil" value="Outro">
-<span><strong>Outro</strong><span class="subtitle">Ainda estou conhecendo o programa</span></span>
-</label>
-</div>
-</div>
-<div class="form-group">
-<label for="projeto">Qual empreendimento interessa?</label>
-<select id="projeto" name="projeto">
+<label for="regiao">Região de interesse</label>
+<select id="regiao" name="regiao" required>
 <option value="">Selecione</option>
-<optgroup label="Zona Sul">
-<option value="Residencial Silverstone">Residencial Silverstone</option>
-<option value="Residencial Estoril">Residencial Estoril</option>
-<option value="Parque Holandês">Parque Holandês</option>
-<option value="Residencial Liviero">Residencial Liviero</option>
-</optgroup>
-<optgroup label="Zona Norte">
-<option value="Saint Guilherme">Saint Guilherme</option>
-<option value="Poente dos Tucanos">Poente dos Tucanos</option>
-<option value="San Miller">San Miller</option>
-<option value="Nascente Pico dos Marins">Nascente Pico dos Marins</option>
-<option value="Recanto do Limoeiro">Recanto do Limoeiro</option>
-<option value="Poente das Bromélias">Poente das Bromélias</option>
-</optgroup>
-<optgroup label="Zona Leste">
-<option value="Residencial Ipês">Residencial Ipês</option>
-<option value="Gran Vista Itaquera">Gran Vista Itaquera</option>
-<option value="Spazio Saint Francis">Spazio Saint Francis</option>
-<option value="San Toledo">San Toledo</option>
-<option value="Gran Arena Itaquera">Gran Arena Itaquera</option>
-<option value="Recanto da Mata">Recanto da Mata</option>
-<option value="Saint Virginia">Saint Virginia</option>
-<option value="Saint Rose">Saint Rose</option>
-</optgroup>
-<optgroup label="Zona Oeste">
-<option value="Mirante do Farol">Mirante do Farol</option>
-<option value="Residencial Vivenza">Residencial Vivenza</option>
-<option value="Ritmos da Barra">Ritmos da Barra</option>
-</optgroup>
-<option value="Todos">Informações de todos</option>
+<option value="Zona Sul">Zona Sul</option>
+<option value="Zona Norte">Zona Norte</option>
+<option value="Zona Leste">Zona Leste</option>
+<option value="Zona Oeste">Zona Oeste</option>
+<option value="Guarulhos">Guarulhos</option>
+<option value="Osasco">Osasco</option>
+<option value="Vale do Paraíba">Vale do Paraíba</option>
+<option value="Grande SP">Grande SP</option>
+</select>
+</div>
+<div class="form-group">
+<label>Já tem FGTS ou pré-aprovação?</label>
+<div class="radio-group" style="flex-direction:row">
+<label class="radio-option" style="flex:1">
+<input type="radio" name="fgts" value="Sim" required>
+<span><strong>Sim</strong></span>
+</label>
+<label class="radio-option" style="flex:1">
+<input type="radio" name="fgts" value="Não">
+<span><strong>Não</strong></span>
+</label>
+</div>
+</div>
+<div class="form-group">
+<label for="pessoas">Pessoas na família</label>
+<select id="pessoas" name="pessoas" required>
+<option value="">Selecione</option>
+<option value="1">1 pessoa</option>
+<option value="2">2 pessoas</option>
+<option value="3">3 pessoas</option>
+<option value="4">4 pessoas</option>
+<option value="5+">5 ou mais</option>
 </select>
 </div>
 <div class="form-buttons">
@@ -801,9 +789,10 @@ transition:all 0.2s
 <div class="summary">
 <div class="summary-item"><label>Nome</label><p id="summaryNome">—</p></div>
 <div class="summary-item"><label>WhatsApp</label><p id="summaryTelefone">—</p></div>
-<div class="summary-item"><label>E-mail</label><p id="summaryEmail">—</p></div>
-<div class="summary-item"><label>Perfil</label><p id="summaryPerfil">—</p></div>
-<div class="summary-item"><label>Empreendimento</label><p id="summaryProjeto">—</p></div>
+<div class="summary-item"><label>Renda</label><p id="summaryRenda">—</p></div>
+<div class="summary-item"><label>Região</label><p id="summaryRegiao">—</p></div>
+<div class="summary-item"><label>FGTS?</label><p id="summaryFgts">—</p></div>
+<div class="summary-item"><label>Família</label><p id="summaryPessoas">—</p></div>
 </div>
 <div class="form-buttons">
 <button type="button" class="btn-previous" onclick="previousStep()">← Voltar</button>
@@ -813,9 +802,9 @@ transition:all 0.2s
 
 <div class="success-message" id="successMessage">
 <div class="success-icon">✓</div>
-<h2>Dados recebidos</h2>
-<p>Entraremos em contato via WhatsApp em breve.</p>
-<p style="margin-top:16px;color:var(--ink-soft);font-size:0.92rem;">Condições sujeitas a análise de crédito e disponibilidade de unidades no programa Minha Casa Minha Vida.</p>
+<h2>Recebemos seus dados!</h2>
+<p>Entraremos em contato via WhatsApp em breve para apresentar as melhores opções.</p>
+<p style="margin-top:12px;color:var(--ink-soft);font-size:0.9rem;">Condições sujeitas a análise de crédito e disponibilidade.</p>
 </div>
 </form>
 </div>
@@ -1236,13 +1225,13 @@ let currentStep=1;
 
 function nextStep(){
 if(currentStep===1){
-if(!document.getElementById('nome').value||!document.getElementById('telefone').value||!document.getElementById('email').value){
+if(!document.getElementById('nome').value||!document.getElementById('telefone').value||!document.getElementById('renda').value){
 alert('Preencha todos os campos');return;
 }
 }
 if(currentStep===2){
-if(!document.querySelector('input[name="perfil"]:checked')){
-alert('Selecione seu perfil');return;
+if(!document.getElementById('regiao').value||!document.querySelector('input[name="fgts"]:checked')||!document.getElementById('pessoas').value){
+alert('Preencha todos os campos');return;
 }
 updateSummary();
 }
@@ -1263,15 +1252,13 @@ document.querySelector('.formulario-container').scrollIntoView({behavior:'smooth
 function updateSummary(){
 document.getElementById('summaryNome').textContent=document.getElementById('nome').value;
 document.getElementById('summaryTelefone').textContent=document.getElementById('telefone').value;
-document.getElementById('summaryEmail').textContent=document.getElementById('email').value;
-document.getElementById('summaryPerfil').textContent=document.querySelector('input[name="perfil"]:checked').value;
-document.getElementById('summaryProjeto').textContent=document.getElementById('projeto').value||'Não especificado';
+document.getElementById('summaryRenda').textContent=document.getElementById('renda').value;
+document.getElementById('summaryRegiao').textContent=document.getElementById('regiao').value;
+document.getElementById('summaryFgts').textContent=document.querySelector('input[name="fgts"]:checked').value;
+document.getElementById('summaryPessoas').textContent=document.getElementById('pessoas').value;
 }
 
 function setProjeto(project){
-const select=document.getElementById('projeto');
-const exists=Array.from(select.options).some(o=>o.value===project);
-if(exists)select.value=project;
 document.getElementById('formulario').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1292,9 +1279,10 @@ const data={
 timestamp:new Date().toLocaleString('pt-BR'),
 nome:document.getElementById('nome').value,
 telefone:document.getElementById('telefone').value,
-email:document.getElementById('email').value,
-perfil:document.querySelector('input[name="perfil"]:checked')?.value||'',
-projeto:document.getElementById('projeto').value||''
+renda:document.getElementById('renda').value,
+regiao:document.getElementById('regiao').value,
+fgts:document.querySelector('input[name="fgts"]:checked')?.value||'',
+pessoas:document.getElementById('pessoas').value
 };
 try{
 await fetch('https://script.google.com/macros/s/AKfycbxzc6EYf8U9gVRZc_bDR2aBJkKeR-Jpjoik8lxX_WJMd_CD_ysY-8Eb3megFkTt6v-Frw/exec',{
