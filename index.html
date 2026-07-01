@@ -24,28 +24,43 @@ function doPost(e) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/gerente-mrv/assets/index-CME7eAv8.js"></script>
-  <link rel="stylesheet" crossorigin href="/gerente-mrv/assets/index-sZGaHCMw.css">
+  <script type="module" crossorigin src="/gerente-mrv/assets/index-vdvD51RL.js"></script>
+  <link rel="stylesheet" crossorigin href="/gerente-mrv/assets/index-ByfOh-FQ.css">
 </head>
 <body class="bg-[#faf8f3] text-[#15130f] font-sans overflow-x-hidden">
 
   <!-- Floating words background -->
-  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden" id="wordBg"></div>
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-70" id="wordBg"></div>
 
   <!-- NAV -->
   <nav class="relative z-50 border-b border-[#c89b3c]/20 bg-white/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-3 no-underline">
-        <img src="https://www.mrv.com.br/content/experience-fragments/conhecer/us/en/site/header/master/_jcr_content/root/header_copy/header_logo_image.coreimg.svg/1762870879014/logo-mrv.svg" alt="MRV" class="h-8 w-auto">
-        <div class="leading-tight">
-          <div class="font-['Cinzel'] text-[#15130f] text-sm font-bold tracking-wide">Gerente Soberano</div>
-          <div class="text-[#00833e]/70 text-[9px] tracking-[2px] uppercase font-semibold">MRV · Parcerias</div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 sm:gap-3 no-underline min-w-0">
+        <img src="https://www.mrv.com.br/content/experience-fragments/conhecer/us/en/site/header/master/_jcr_content/root/header_copy/header_logo_image.coreimg.svg/1762870879014/logo-mrv.svg" alt="MRV" class="h-7 sm:h-8 w-auto shrink-0">
+        <div class="leading-tight min-w-0">
+          <div class="font-['Cinzel'] text-[#15130f] text-xs sm:text-sm font-bold tracking-wide truncate">Gerente Soberano</div>
+          <div class="text-[#00833e]/70 text-[8px] sm:text-[9px] tracking-[1px] sm:tracking-[2px] uppercase font-semibold truncate">MRV · Parcerias</div>
         </div>
       </a>
-      <div class="flex items-center gap-6">
+      <!-- Desktop nav -->
+      <div class="hidden md:flex items-center gap-6">
         <a href="#projetos" class="text-[#5b564c] hover:text-[#c89b3c] text-xs tracking-[1px] uppercase font-semibold transition-colors no-underline relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#c89b3c] after:transition-all hover:after:w-full">Empreendimentos</a>
         <a href="#formCorretor" class="text-[#5b564c] hover:text-[#00833e] text-xs tracking-[1px] uppercase font-semibold transition-colors no-underline relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#00833e] after:transition-all hover:after:w-full">Sou Corretor</a>
-        <a href="#formCliente" class="bg-gradient-to-r from-[#00833e] to-[#00a651] text-white px-5 py-2 rounded text-xs font-bold tracking-wide no-underline hover:shadow-lg hover:shadow-[#00833e]/20 transition-all" style="font-family:'Cinzel'">QUERO MEU APÊ</a>
+        <a href="#formCliente" class="bg-gradient-to-r from-[#00833e] to-[#00a651] text-white px-5 py-2 rounded text-xs font-bold tracking-wide no-underline hover:shadow-lg hover:shadow-[#00833e]/20 transition-all whitespace-nowrap" style="font-family:'Cinzel'">QUERO MEU APÊ</a>
+      </div>
+      <!-- Mobile hamburger -->
+      <button id="menuToggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg border border-[#c89b3c]/20 text-[#5b564c] hover:bg-[#c89b3c]/5 transition-colors cursor-pointer" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M2.5 5h15M2.5 10h15M2.5 15h15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-[#c89b3c]/20 bg-white/95 backdrop-blur-md">
+      <div class="px-4 py-4 flex flex-col gap-3">
+        <a href="#projetos" class="text-[#5b564c] hover:text-[#c89b3c] text-sm tracking-[1px] uppercase font-semibold transition-colors no-underline py-2">Empreendimentos</a>
+        <a href="#formCorretor" class="text-[#5b564c] hover:text-[#00833e] text-sm tracking-[1px] uppercase font-semibold transition-colors no-underline py-2">Sou Corretor</a>
+        <a href="#formCliente" class="bg-gradient-to-r from-[#00833e] to-[#00a651] text-white text-center px-5 py-3 rounded text-xs font-bold tracking-wide no-underline" style="font-family:'Cinzel'">QUERO MEU APÊ</a>
       </div>
     </div>
   </nav>
@@ -62,7 +77,7 @@ function doPost(e) {
           <span class="text-[#00833e]/80 text-[10px] tracking-[3px] uppercase font-['Orbitron']">Programa MCMV 2026</span>
         </div>
         <h1 class="font-['Cinzel'] text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6">
-          <span class="text-[#15130f]">MRV</span><br>
+          <span class="text-[#15130f]">Gerente</span><br>
           <span class="text-[#c89b3c]">Soberano</span>
         </h1>
         <p class="text-lg md:text-xl text-[#5b564c] max-w-xl mb-10 leading-relaxed font-light">
@@ -84,16 +99,23 @@ function doPost(e) {
   </section>
 
   <!-- DESTAQUE -->
-  <section class="relative z-10 py-20 bg-[#faf8f3]">
+  <section class="relative z-10 py-16 sm:py-20 bg-[#faf8f3] overflow-hidden">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center mb-14">
+      <div class="text-center mb-10 sm:mb-14">
         <div class="inline-flex items-center gap-2 border border-[#c89b3c]/30 rounded-full bg-white px-4 py-1.5 mb-6">
           <span class="text-[#c89b3c]/60 text-[10px] tracking-[3px] uppercase font-['Orbitron']">Em Foco</span>
         </div>
-        <h2 class="font-['Cinzel'] text-3xl md:text-4xl font-black text-[#15130f] mb-2">Empreendimentos em Destaque</h2>
-        <p class="text-[#5b564c] max-w-lg mx-auto font-light text-sm">Clique para saber mais e simular seu financiamento</p>
+        <h2 class="font-['Cinzel'] text-2xl sm:text-3xl md:text-4xl font-black text-[#15130f] mb-2">Empreendimentos em Destaque</h2>
+        <p class="text-[#5b564c] max-w-lg mx-auto font-light text-xs sm:text-sm">Clique para saber mais e simular seu financiamento</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="destaqueGrid"></div>
+      <div class="relative" id="destaqueWrapper">
+        <div id="destaqueSlider" class="flex transition-transform duration-700 ease-in-out cursor-pointer"></div>
+        <!-- Controls -->
+        <button id="destaquePrev" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-[#c89b3c]/20 text-[#c89b3c] flex items-center justify-center cursor-pointer hover:bg-white transition-all shadow-lg text-lg">‹</button>
+        <button id="destaqueNext" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-[#c89b3c]/20 text-[#c89b3c] flex items-center justify-center cursor-pointer hover:bg-white transition-all shadow-lg text-lg">›</button>
+        <!-- Dots -->
+        <div id="destaqueDots" class="flex items-center justify-center gap-2 mt-6"></div>
+      </div>
     </div>
   </section>
 
